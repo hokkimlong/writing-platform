@@ -69,14 +69,16 @@ export default function Layout(props) {
               <MenuIcon />
             </IconButton>
             <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-              <Typography
-                variant='h6'
-                component='div'
-                sx={{ display: { xs: 'none', sm: 'block' }, mr: 1 }}
-                color='primary'
-              >
-                <b>RE AD</b>
-              </Typography>
+              <Link style={{ textDecoration: 'none' }} to={ROUTES.HOME}>
+                <Typography
+                  variant='h6'
+                  component='div'
+                  sx={{ display: { xs: 'none', sm: 'block' }, mr: 1 }}
+                  color='primary'
+                >
+                  <b>RE AD</b>
+                </Typography>
+              </Link>
               <TextField placeholder='Search...' size='small' />
             </Box>
             <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
