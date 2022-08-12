@@ -1,9 +1,12 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { getToken } from 'src/api/custom-axios';
 
 const AuthRoute = ({ auth = false, children, redirect, ...rest }) => {
   let isAuth = false;
-  if ('userpos' === 'true') {
+  const token = getToken();
+
+  if (token) {
     isAuth = true;
   }
 

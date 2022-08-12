@@ -1,19 +1,25 @@
 import {
   Autocomplete,
   Button,
-  Chip,
   Grid,
   InputBase,
   Paper,
   TextField,
 } from '@mui/material';
 import { Box, Container } from '@mui/system';
+import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import ARTICLE_API from 'src/api/article';
+import TAG_API from 'src/api/tag';
 import RichTextEditor from 'src/components/RichText';
 import Tag from 'src/components/Tag';
+import { ROUTES } from 'src/routes';
+import Swal from 'sweetalert2';
 
 const WritePage = () => {
-  const { control, handleSubmit, setValue } = useForm({
+  const navigate = useNavigate();
+  const { control, handleSubmit } = useForm({
     defaultValues: {
       title: '',
       tags: [],
@@ -21,8 +27,41 @@ const WritePage = () => {
     },
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     console.log('data', data);
+    const { title, content, tags } = data;
+    const payload = {
+      title,
+      content,
+      tags: tags.filter((tag) => typeof tag !== 'string'),
+      newTags: tags.filter((tag) => typeof tag === 'string'),
+    };
+
+    Swal.fire({
+      title: 'Create Post',
+      html: 'Creating...', // add html attribute if you want or remove
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+        ARTICLE_API.create(payload)
+          .then((response) => {
+            Swal.close();
+            Swal.fire({
+              title: 'Create Success',
+              html: 'Your post has been published',
+              icon: 'success',
+              showConfirmButton: false,
+              timer: 1500,
+              willClose: () => {
+                navigate(ROUTES.HOME);
+              },
+            });
+          })
+          .catch((error) => {
+            Swal.fire('Create Failed', error?.response?.data?.message, 'errro');
+          });
+      },
+    });
   };
 
   return (
@@ -62,42 +101,13 @@ const WritePage = () => {
                     defaultValue={[]}
                     control={control}
                     name='tags'
+                    rules={{ required: true }}
                     render={({ field: { value, onChange, ref } }) => (
-                      <Autocomplete
-                        value={value}
-                        onChange={(e, data) => {
-                          onChange(data);
-                        }}
-                        multiple
-                        options={['apple']}
-                        freeSolo
-                        disableClearable
-                        renderTags={(value, getTagProps) =>
-                          value.map((option, index) => (
-                            <Tag name={option} {...getTagProps({ index })} />
-                          ))
-                        }
-                        renderInput={(params) => (
-                          <TextField
-                            sx={{
-                              mb: 2,
-                            }}
-                            {...params}
-                            inputRef={ref}
-                            InputProps={{
-                              ...params.InputProps,
-                              disableUnderline: true,
-                            }}
-                            variant='standard'
-                            size='small'
-                            placeholder='Add tags by select or type then hit enter...'
-                          />
-                        )}
-                      />
+                      <TagsInput value={value} onChange={onChange} ref={ref} />
                     )}
                   ></Controller>
                   <Controller
-                    name='body'
+                    name='content'
                     control={control}
                     render={({ field: { value, onChange } }) => (
                       <RichTextEditor value={value} onChange={onChange} />
@@ -129,4 +139,58 @@ const WritePage = () => {
     </Box>
   );
 };
+
+const TagsInput = React.forwardRef(({ value, onChange }, ref) => {
+  const [list, setList] = useState([]);
+
+  const search = async (value) => {
+    try {
+      const response = await TAG_API.list({ search: value, page: 0 });
+      setList(response?.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return (
+    <Autocomplete
+      value={value}
+      autoHighlight
+      onChange={(e, data) => {
+        onChange(data);
+      }}
+      onKeyUp={(e) => {
+        const value = e.target.value;
+        search(value);
+      }}
+      multiple
+      options={list}
+      freeSolo
+      disableClearable
+      getOptionLabel={(option) => option.name}
+      renderTags={(value, getTagProps) =>
+        value.map((option, index) => {
+          const name = option?.name ?? option;
+          return <Tag name={name} {...getTagProps({ index })} />;
+        })
+      }
+      renderInput={(params) => (
+        <TextField
+          sx={{
+            mb: 2,
+          }}
+          {...params}
+          inputRef={ref}
+          InputProps={{
+            ...params.InputProps,
+            disableUnderline: true,
+          }}
+          variant='standard'
+          size='small'
+          placeholder='Add tags by select or type then hit enter...'
+        />
+      )}
+    />
+  );
+});
 export default WritePage;

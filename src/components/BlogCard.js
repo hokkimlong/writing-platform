@@ -1,12 +1,17 @@
 import { Grid, Paper, Typography, Link as MuiLink } from '@mui/material';
 import { Box } from '@mui/system';
 import { Link } from 'react-router-dom';
+import { ROUTES } from 'src/routes';
 import Profile from './Profile';
 import Tag from './Tag';
 
-const BlogCard = ({ user, title, tags, date = new Date() }) => {
+const BlogCard = ({ id, user, title, tags, date = new Date() }) => {
   return (
-    <Paper sx={{ p: 2 }}>
+    <Paper
+      sx={{
+        p: 2,
+      }}
+    >
       <Grid container direction='column' spacing={1}>
         <Grid item>
           <Profile date={date} user={user} />
@@ -17,7 +22,7 @@ const BlogCard = ({ user, title, tags, date = new Date() }) => {
               <Box sx={{ width: '38px' }}></Box>
             </Grid>
             <Grid item>
-              <Link to='/'>
+              <Link to={ROUTES.ARTICLE(id)}>
                 <MuiLink>
                   <Typography variant='h5' sx={{ fontWeight: '600' }}>
                     {title}
@@ -36,7 +41,7 @@ const BlogCard = ({ user, title, tags, date = new Date() }) => {
               <Grid container spacing={1}>
                 {tags?.map((item) => (
                   <Grid item>
-                    <Tag name={item.name} />
+                    <Tag name={item.name} id={item.id} />
                   </Grid>
                 ))}
               </Grid>

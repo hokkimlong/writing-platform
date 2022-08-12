@@ -1,19 +1,25 @@
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import { Container } from '@mui/system';
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import ARTICLE_API from 'src/api/article';
-import TAG_API from 'src/api/tag';
 import BlogCard from 'src/components/BlogCard';
-import Tag from 'src/components/Tag';
+import { TagList } from './Home';
 
-const HomePage = () => {
+const getQuery = (search, queryName) => {
+  return new URLSearchParams(search).get(queryName);
+};
+
+const SearchPage = () => {
   const [articles, setArticles] = useState([]);
+  const search = useLocation().search;
+  const query = getQuery(search, 'q');
 
   useEffect(() => {
     const handleFetchArticle = async () => {
       try {
         const response = await ARTICLE_API.list({
-          search: '',
+          search: query,
           limit: 10,
           page: 0,
         });
@@ -23,7 +29,7 @@ const HomePage = () => {
       }
     };
     handleFetchArticle();
-  }, []);
+  }, [query]);
 
   return (
     <Box my={2}>
@@ -46,7 +52,7 @@ const HomePage = () => {
           <Grid item xs={9}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <Typography variant='h2'>Latest</Typography>
+                <Typography variant='h2'>Search {query}</Typography>
               </Grid>
               {articles.map(({ id, tags, title, createdAt, user }) => (
                 <Grid item xs={12}>
@@ -67,36 +73,4 @@ const HomePage = () => {
   );
 };
 
-export const TagList = () => {
-  const [tags, setTags] = useState([]);
-
-  useEffect(() => {
-    const handleFetchComment = async () => {
-      try {
-        const response = await TAG_API.list({ popular: 1 });
-        setTags(response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    handleFetchComment();
-  }, []);
-
-  return (
-    <Paper sx={{ p: 2 }}>
-      <Grid container spacing={1}>
-        {tags.map((item) => (
-          <Grid item>
-            <Tag
-              id={item.id}
-              size='large'
-              name={item.name}
-              available={item.availableArticle}
-            />
-          </Grid>
-        ))}
-      </Grid>
-    </Paper>
-  );
-};
-export default HomePage;
+export default SearchPage;

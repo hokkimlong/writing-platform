@@ -25,7 +25,11 @@ const BlogArtical = ({ article }) => {
       </Grid>
       <Grid item>
         <Box>
-          <Typography sx={{ fontSize: '20px' }}>{article.body}</Typography>
+          <div></div>
+          <Typography
+            sx={{ fontSize: '20px' }}
+            dangerouslySetInnerHTML={{ __html: article.content }}
+          ></Typography>
         </Box>
       </Grid>
     </Grid>

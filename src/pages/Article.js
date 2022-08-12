@@ -1,35 +1,50 @@
 import {
-  Avatar,
   Box,
   Button,
   Divider,
   Grid,
-  InputAdornment,
   Paper,
   TextField,
   Typography,
 } from '@mui/material';
 import { Container } from '@mui/system';
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BlogArtical from 'src/components/BlogArticle';
 import SendIcon from '@mui/icons-material/Send';
+import { useNavigate, useParams } from 'react-router-dom';
+import ARTICLE_API from 'src/api/article';
+import { Controller, useForm } from 'react-hook-form';
+import { useAuth } from 'src/contexts/AuthProvider';
+import Swal from 'sweetalert2';
+import { ROUTES } from 'src/routes';
+import COMMENT_API from 'src/api/comment';
+import Avatar from 'src/components/Avatar';
+var relativeTime = require('dayjs/plugin/relativeTime');
+dayjs.extend(relativeTime);
 
 const ArticlePage = () => {
-  const [article, setArticle] = useState({
-    title: 'Hello World',
-    user: { name: 'KIKI' },
-    createdAt: new Date(),
-    tags: [{ name: 'apple' }, { name: 'banana' }],
-    body: `
-    hello every body
-   forward and start building a website.
-Building a website isn't as simple a task as it sounds. Some people just drop a WordPress installation and paste a theme on it, but I'm looking for something more interesting and advanced.
-Building a site involves a lot of planning in choosing the right framework for the task. So with that thought, I'm writing this article about choosing the right framework. Should it be react, Vue, Next JS, or even something I'm not familiar with?
+  const { id } = useParams();
+  const [article, setArticle] = useState({});
+  const [refreshComment, setRefreshComment] = useState(false);
+  const handleRefreshComment = () => {
+    setRefreshComment((prev) => !prev);
+  };
 
-Define Your Purpose 
-    `,
-  });
+  useEffect(() => {
+    const handleFetchArticle = async () => {
+      if (id) {
+        try {
+          const response = await ARTICLE_API.getById(id);
+          setArticle(response.data);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    };
+    handleFetchArticle();
+  }, [id]);
+
   return (
     <Box my={2}>
       <Container>
@@ -54,16 +69,16 @@ Define Your Purpose
                         </Typography>
                       </Grid>
                       <Grid item xs={12}>
-                        <SendDiscussionBox />
+                        <SendDiscussionBox
+                          articleId={id}
+                          handleRefreshComment={handleRefreshComment}
+                        />
                       </Grid>
                       <Grid item xs={12}>
-                        <Grid container spacing={2}>
-                          {Array.from(new Array(6)).map((item) => (
-                            <Grid item xs={12}>
-                              <Comment />
-                            </Grid>
-                          ))}
-                        </Grid>
+                        <CommentList
+                          articleId={id}
+                          refreshComment={refreshComment}
+                        />
                       </Grid>
                     </Grid>
                   </Box>
@@ -77,23 +92,90 @@ Define Your Purpose
   );
 };
 
-const SendDiscussionBox = () => {
+const SendDiscussionBox = ({ articleId, handleRefreshComment }) => {
+  const { control, reset, handleSubmit } = useForm();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const onSubmit = async (data) => {
+    if (!user) {
+      return requiredLogin();
+    }
+
+    try {
+      const { message } = data;
+      const payload = { articleId, message };
+      const response = await COMMENT_API.create(payload);
+      Swal.fire({
+        showConfirmButton: false,
+        timer: 1200,
+        title: 'You just add a comment',
+        icon: 'success',
+        willClose: () => {
+          handleRefreshComment();
+          reset({ message: '' });
+        },
+      });
+    } catch (error) {
+      Swal.fire({ title: 'Send Comment failed', icon: 'error' });
+    }
+  };
+
+  const requiredLogin = () => {
+    Swal.fire({
+      title: 'Login Required',
+      icon: 'information',
+      showDenyButton: true,
+      showCloseButton: true,
+      denyButtonText: 'Create account',
+      confirmButtonText: 'Login',
+      preConfirm: () => {
+        navigate(ROUTES.LOGIN);
+      },
+      preDeny: () => {
+        navigate(ROUTES.REGISTER);
+      },
+    });
+  };
+
   return (
-    <Grid container spacing={1}>
+    <Grid
+      component='form'
+      onSubmit={handleSubmit(onSubmit)}
+      container
+      spacing={1}
+    >
       <Grid item xs='auto'>
-        <Avatar sx={{ width: '36px', height: '36px' }} />
+        <Avatar width='36px' height='36px' name={user?.user?.name} />
       </Grid>
       <Grid item xs sx={{ position: 'relative' }}>
-        <TextField
-          size='small'
-          multiline
-          minRows={2}
-          fullWidth
-          placeholder='Add to discussion'
-          variant='outlined'
-          inputProps={{ style: { paddingBottom: '38px' } }}
-        />
+        <Controller
+          name='message'
+          control={control}
+          render={({ field: { value, onChange, ref } }) => (
+            <TextField
+              required
+              disabled={!user}
+              inputRef={ref}
+              onClick={() => {
+                if (!user) {
+                  requiredLogin();
+                }
+              }}
+              value={value}
+              onChange={onChange}
+              size='small'
+              multiline
+              minRows={2}
+              fullWidth
+              placeholder='Add to discussion'
+              variant='outlined'
+              inputProps={{ style: { paddingBottom: '38px' } }}
+            />
+          )}
+        ></Controller>
         <Button
+          type='submit'
           endIcon={<SendIcon />}
           sx={{
             position: 'absolute',
@@ -109,11 +191,43 @@ const SendDiscussionBox = () => {
   );
 };
 
-const Comment = () => {
+const CommentList = ({ articleId, refreshComment }) => {
+  const [comments, setComments] = useState([]);
+
+  useEffect(() => {
+    const handleFetchComment = async () => {
+      if (articleId) {
+        try {
+          const response = await ARTICLE_API.getComment(articleId);
+          setComments(response.data);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    };
+    handleFetchComment();
+  }, [articleId, refreshComment]);
+
+  return (
+    <Grid container spacing={2}>
+      {comments.map((item) => (
+        <Grid item xs={12}>
+          <Comment
+            user={item.user}
+            date={item.createdAt}
+            message={item.message}
+          />
+        </Grid>
+      ))}
+    </Grid>
+  );
+};
+
+const Comment = ({ user, message, date }) => {
   return (
     <Grid container spacing={1}>
       <Grid item xs='auto'>
-        <Avatar sx={{ width: '36px', height: '36px', mt: 1 }} />
+        <Avatar width='36px' height='36px' name={user?.name} />
       </Grid>
       <Grid item xs>
         <Box
@@ -127,7 +241,7 @@ const Comment = () => {
           <Grid container spacing={1}>
             <Grid item container>
               <Typography sx={{ fontSize: '14px' }}>
-                <b>Name</b>
+                <b>{user?.name}</b>
               </Typography>
               <Typography
                 color='textSecondary'
@@ -136,12 +250,12 @@ const Comment = () => {
                 •
               </Typography>
               <Typography color='textSecondary' sx={{ fontSize: '14px' }}>
-                {dayjs(new Date()).format('MMM d')}
+                {dayjs(date).format('MMM DD')} {`(${dayjs(date).fromNow()})`}
               </Typography>
             </Grid>
             <Grid item>
               <Box>
-                <Typography>hello</Typography>
+                <Typography>{message}</Typography>
               </Box>
             </Grid>
           </Grid>
