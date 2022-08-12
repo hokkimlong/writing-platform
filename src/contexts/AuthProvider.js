@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AUTH_API from 'src/api/auth';
+import axios, { clearToken, getToken } from 'src/api/custom-axios';
 import { ROUTES } from 'src/routes';
 
 export const AuthContext = createContext({
@@ -8,6 +9,7 @@ export const AuthContext = createContext({
   loading: true,
   logout: () => {},
   getUser: () => {},
+  setUser: () => {},
 });
 
 const AuthContextProvider = ({ children }) => {
@@ -28,12 +30,20 @@ const AuthContextProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    getUser();
+    const token = getToken();
+    console.log('token', token);
+    if (token) {
+      axios.defaults.headers.Authorization = `Bearer ${token}`;
+      getUser();
+    }
   }, []);
 
   const logout = async () => {
     try {
       await AUTH_API.logout();
+      clearToken();
+      setUser(null);
+      navigate(ROUTES.HOME);
     } catch (error) {
       console.log(error);
     } finally {
@@ -41,7 +51,7 @@ const AuthContextProvider = ({ children }) => {
     }
   };
 
-  const value = { user, loading, logout, getUser };
+  const value = { user, loading, logout, getUser, setUser };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

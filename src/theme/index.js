@@ -7,6 +7,9 @@ let theme = createTheme({
       light: '#F999B7',
     },
   },
+  typography: {
+    fontFamily: ['Roboto', 'Arial', 'sans-serif'].join(','),
+  },
   components: {
     MuiPaper: {
       styleOverrides: {
@@ -18,6 +21,9 @@ let theme = createTheme({
           boxShadow:
             '1px 1px 18px 1px rgb(0 0 0 / 10%), -1px 0px 4px 0px rgb(0 0 0 / 5%), 0px 0px 0px 0px rgb(0 0 0 / 10%)',
         },
+      },
+      defaultProps: {
+        elevation: 0,
       },
     },
     MuiAppBar: {
@@ -35,7 +41,7 @@ let theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         '& body': {
-          //   background: '#FCE2DB',
+          background: '#fce2db87',
         },
       },
     },
