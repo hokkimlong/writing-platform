@@ -18,7 +18,7 @@ const BlogArtical = ({ article }) => {
         <Grid container spacing={1}>
           {article.tags?.map((tag) => (
             <Grid item>
-              <Tag name={tag?.name} />
+              <Tag name={tag?.name} id={tag?.id} />
             </Grid>
           ))}
         </Grid>
