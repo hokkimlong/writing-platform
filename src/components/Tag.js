@@ -1,7 +1,7 @@
-import { Chip, Typography } from '@mui/material';
-import { Box } from '@mui/system';
-import { useNavigate } from 'react-router-dom';
-import { ROUTES } from 'src/routes';
+import { Chip, Typography } from "@mui/material";
+import { Box } from "@mui/system";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "src/routes";
 
 const Tag = ({ name, id, available, ...props }) => {
   const navigate = useNavigate();
@@ -9,30 +9,32 @@ const Tag = ({ name, id, available, ...props }) => {
     <Chip
       onClick={(e) => {
         e.stopPropagation();
-        navigate(ROUTES.TAG(id));
+        if (id) {
+          navigate(ROUTES.TAG(id));
+        }
       }}
-      component='a'
+      component="a"
       clickable
-      size='small'
+      size="small"
       label={
-        <Box display='flex' alignItems='center'>
-          <Typography color='primary' sx={{ fontWeight: '600' }}>
+        <Box display="flex" alignItems="center">
+          <Typography color="primary" sx={{ fontWeight: "600" }}>
             #
           </Typography>
-          <Typography variant='caption'>{name}</Typography>
+          <Typography variant="caption">{name}</Typography>
           {available && (
             <Box
               sx={{
-                ml: '5px',
+                ml: "5px",
                 background: (theme) => theme.palette.primary.light,
-                borderRadius: '50%',
-                color: 'white',
-                minWidth: '20px',
-                minHeight: '20px',
-                textAlign: 'center',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
+                borderRadius: "50%",
+                color: "white",
+                minWidth: "20px",
+                minHeight: "20px",
+                textAlign: "center",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
               {available}

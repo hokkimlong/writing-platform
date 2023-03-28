@@ -1,13 +1,13 @@
-import axios from 'axios';
+import axios from "axios";
 
 const baseURL = `${process.env.REACT_APP_API}/api`;
 
 axios.defaults.baseURL = baseURL;
 
-axios.defaults.withCredentials = true;
+// axios.defaults.withCredentials = true;
 
 export const getToken = () => {
-  const token = window.localStorage.getItem('token');
+  const token = window.localStorage.getItem("token");
   return token || null;
 };
 
@@ -16,7 +16,7 @@ export const getAuthorizationHeader = () => `Bearer ${getToken()}`;
 export const setToken = (token) => {
   let accessToken = null;
   if (token) {
-    window.localStorage.setItem('token', token);
+    window.localStorage.setItem("token", token);
     accessToken = token;
   } else {
     accessToken = getToken();
@@ -25,7 +25,7 @@ export const setToken = (token) => {
 };
 
 export const clearToken = () => {
-  window.localStorage.removeItem('token');
+  window.localStorage.removeItem("token");
 };
 
 // check if forbidden will log user out

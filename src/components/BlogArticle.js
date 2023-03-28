@@ -1,16 +1,16 @@
-import { Grid, Typography } from '@mui/material';
-import { Box } from '@mui/system';
-import Profile from './Profile';
-import Tag from './Tag';
+import { Grid, Typography } from "@mui/material";
+import { Box } from "@mui/system";
+import Profile from "./Profile";
+import Tag from "./Tag";
 
 const BlogArtical = ({ article }) => {
   return (
-    <Grid container direction='column' spacing={2}>
+    <Grid container direction="column" spacing={2}>
       <Grid item>
         <Profile user={article?.user} date={article?.createdAt} />
       </Grid>
       <Grid item>
-        <Typography variant='h3' sx={{ fontWeight: '600' }}>
+        <Typography variant="h3" sx={{ fontWeight: "600" }}>
           {article?.title}
         </Typography>
       </Grid>
@@ -18,7 +18,7 @@ const BlogArtical = ({ article }) => {
         <Grid container spacing={1}>
           {article.tags?.map((tag) => (
             <Grid item>
-              <Tag name={tag?.name} />
+              <Tag id={tag?.id} name={tag?.name} />
             </Grid>
           ))}
         </Grid>
@@ -27,7 +27,7 @@ const BlogArtical = ({ article }) => {
         <Box>
           <div></div>
           <Typography
-            sx={{ fontSize: '20px' }}
+            sx={{ fontSize: "20px" }}
             dangerouslySetInnerHTML={{ __html: article.content }}
           ></Typography>
         </Box>

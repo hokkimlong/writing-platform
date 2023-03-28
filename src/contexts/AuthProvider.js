@@ -1,8 +1,8 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import AUTH_API from 'src/api/auth';
-import axios, { clearToken, getToken } from 'src/api/custom-axios';
-import { ROUTES } from 'src/routes';
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import AUTH_API from "src/api/auth";
+import axios, { clearToken, getToken } from "src/api/custom-axios";
+import { ROUTES } from "src/routes";
 
 export const AuthContext = createContext({
   user: null,
@@ -13,7 +13,7 @@ export const AuthContext = createContext({
 });
 
 const AuthContextProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({});
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -31,7 +31,7 @@ const AuthContextProvider = ({ children }) => {
 
   useEffect(() => {
     const token = getToken();
-    console.log('token', token);
+    console.log("token", token);
     if (token) {
       axios.defaults.headers.Authorization = `Bearer ${token}`;
       getUser();

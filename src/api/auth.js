@@ -1,17 +1,17 @@
-import axios from './custom-axios';
+import axios from "./custom-axios";
 
 const AUTH_API = {
   register: (data) => {
-    return axios.post('/Auth', data);
+    return axios.post("/Auth", data);
   },
   login: (data) => {
-    return axios.post('/Auth/login', data);
+    return axios.post("/Auth/login", data);
   },
   getUser: () => {
-    return axios.get('/Auth/me');
+    return axios.get("/Auth/me");
   },
   logout: () => {
-    return axios.get('/Auth/logout');
+    return axios.get("/Auth/logout");
   },
   getUserById: (id) => {
     return axios.get(`/Auth/user/${id}`);

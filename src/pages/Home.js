@@ -1,10 +1,10 @@
-import { Box, Grid, Paper, Typography } from '@mui/material';
-import { Container } from '@mui/system';
-import { useEffect, useState } from 'react';
-import ARTICLE_API from 'src/api/article';
-import TAG_API from 'src/api/tag';
-import BlogCard from 'src/components/BlogCard';
-import Tag from 'src/components/Tag';
+import { Box, Grid, Paper, Typography } from "@mui/material";
+import { Container } from "@mui/system";
+import { useEffect, useState } from "react";
+import ARTICLE_API from "src/api/article";
+import TAG_API from "src/api/tag";
+import BlogCard from "src/components/BlogCard";
+import Tag from "src/components/Tag";
 
 const HomePage = () => {
   const [articles, setArticles] = useState([]);
@@ -13,13 +13,13 @@ const HomePage = () => {
     const handleFetchArticle = async () => {
       try {
         const response = await ARTICLE_API.list({
-          search: '',
+          search: "",
           limit: 10,
           page: 0,
         });
         setArticles(response.data);
       } catch (error) {
-        console.log('error', error);
+        console.log("error", error);
       }
     };
     handleFetchArticle();
@@ -33,10 +33,10 @@ const HomePage = () => {
             <Grid
               container
               spacing={2}
-              sx={{ position: 'sticky', top: '64px' }}
+              sx={{ position: "sticky", top: "64px" }}
             >
               <Grid item xs={12}>
-                <Typography variant='h2'>Tags</Typography>
+                <Typography variant="h2">Tags</Typography>
               </Grid>
               <Grid item xs={12}>
                 <TagList />
@@ -46,7 +46,7 @@ const HomePage = () => {
           <Grid item xs={9}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <Typography variant='h2'>Latest</Typography>
+                <Typography variant="h2">Latest</Typography>
               </Grid>
               {articles.map(({ id, tags, title, createdAt, user }) => (
                 <Grid item xs={12}>
@@ -73,7 +73,7 @@ export const TagList = () => {
   useEffect(() => {
     const handleFetchComment = async () => {
       try {
-        const response = await TAG_API.list({ popular: 1 });
+        const response = await TAG_API.popular();
         setTags(response.data);
       } catch (error) {
         console.log(error);
@@ -89,7 +89,7 @@ export const TagList = () => {
           <Grid item>
             <Tag
               id={item.id}
-              size='large'
+              size="large"
               name={item.name}
               available={item.availableArticle}
             />
