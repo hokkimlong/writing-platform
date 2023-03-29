@@ -33,7 +33,7 @@ axios.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error && error.response?.status === 401) {
-      window.location.reload();
+      window.location.replace("/login");
     }
     return Promise.reject(error);
   }
